@@ -114,10 +114,12 @@ def collect_flood(walls):
     max_right = walls[right]
     total_water_captured = 0
     while left < right:
+        #  DRY this up
         next_max_left = max(walls[left], max_left)
         if next_max_left != max_left:
             previous_max_left = max_left
             max_left = next_max_left
+        #  DRY this up
         next_max_right = max(walls[right], max_right)
         if next_max_right != max_right:
             previous_max_right = max_right
@@ -126,6 +128,7 @@ def collect_flood(walls):
             if max_left > 0:
                 total_water_captured += max_left - previous_max_left
             left += 1
+            #  DRY this up
             max_left = max(max_left, walls[left])
             if next_max_left != max_left:
                 previous_max_left = max_left
@@ -137,6 +140,7 @@ def collect_flood(walls):
                 total_water_captured += max_right - previous_max_right
             right -= 1
             max_right = max(max_right, walls[right])
+            #  DRY this up
             if next_max_right != max_right:
                 previous_max_right = max_right
                 max_right = next_max_right
