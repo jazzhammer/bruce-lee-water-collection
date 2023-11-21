@@ -10,9 +10,10 @@ import math
 #      \/     \/                \/          \/     )/        \/\/                            \/     \/      \/
 # https://www.youtube.com/watch?v=V4A37PDduls
 
-def collectRain(walls):
-    if walls == None or len(walls) < 2:
+def collect_rain(walls):
+    if not walls or len(walls) < 2 or max(walls) == 0:
         return 0
+    walls = walls.copy()
     # reduce, if necessary, to a maximum that occurs at least 2 times.
     total_water_collected = 0
     while max(walls) > 0:
@@ -91,22 +92,76 @@ def twoMaxesOrMaxIndex(walls):
     }
 
 
+
+#   be like a flood, my friend
+#     .___            .__                .__                                     .__
+#   __| _/____   _____|__| ____   ____   |__| ______ ___  __ ___________ ___.__. |  |__  __ __  _____ _____    ____
+#  / __ |/ __ \ /  ___/  |/ ___\ /    \  |  |/  ___/ \  \/ // __ \_  __ <   |  | |  |  \|  |  \/     \\__  \  /    \
+# / /_/ \  ___/ \___ \|  / /_/  >   |  \ |  |\___ \   \   /\  ___/|  | \/\___  | |   Y  \  |  /  Y Y  \/ __ \|   |  \
+# \____ |\___  >____  >__\___  /|___|  / |__/____  >   \_/  \___  >__|   / ____| |___|  /____/|__|_|  (____  /___|  /
+#      \/    \/     \/  /_____/      \/          \/             \/       \/           \/            \/     \/     \/
+
+# https://www.tiktok.com/@rhapilucky/video/7256329396527631658
+def collect_flood(walls):
+    if not walls or len(walls) < 2 or max(walls) == 0:
+        return 0
+    walls = walls.copy()
+    left = 0
+    right = len(walls) - 1
+    previous_max_left = 0
+    max_left = walls[left]
+    previous_max_right = 0
+    max_right = walls[right]
+    total_water_captured = 0
+    while left < right:
+        next_max_left = max(walls[left], max_left)
+        if next_max_left != max_left:
+            previous_max_left = max_left
+            max_left = next_max_left
+        next_max_right = max(walls[right], max_right)
+        if next_max_right != max_right:
+            previous_max_right = max_right
+            max_right = next_max_right
+        while walls[left] <= walls[right] and walls[left] <= max_left:
+            if max_left > 0:
+                total_water_captured += max_left - previous_max_left
+            left += 1
+            max_left = max(max_left, walls[left])
+            if next_max_left != max_left:
+                previous_max_left = max_left
+                max_left = next_max_left
+            if left == right:
+                break
+        while walls[left] > walls[right]:
+            if max_right > 0:
+                total_water_captured += max_right - previous_max_right
+            right -= 1
+            max_right = max(max_right, walls[right])
+            if next_max_right != max_right:
+                previous_max_right = max_right
+                max_right = next_max_right
+            if left == right:
+                break
+
+    return total_water_captured
+
+
 def expect(walls, actual, expected):
     if (actual != expected):
-        print(f"rainGorithm fails for wall config: {walls}, expected {expected}, calculated {actual}")
+        print(f"wallGorithm fails for wall config: {walls}, expected {expected}, calculated {actual}")
 
 if __name__ == '__main__':
     # simple zeros & 1s:
-    expect([], collectRain([]), 0)
-    expect([0], collectRain([0]), 0)
-    expect([1], collectRain([1]), 0)
-    expect([9991], collectRain([9991]), 0)
+    expect([], collect_rain([]), 0)
+    expect([0], collect_rain([0]), 0)
+    expect([1], collect_rain([1]), 0)
+    expect([9991], collect_rain([9991]), 0)
 
     # simple 2s:
-    expect([0, 1], collectRain([0, 1]), 0)
-    expect([1, 0], collectRain([1, 0]), 0)
-    expect([1, 1], collectRain([1, 1]), 1)
-    expect([0, 0], collectRain([0, 0]), 0)
+    expect([0, 1], collect_rain([0, 1]), 0)
+    expect([1, 0], collect_rain([1, 0]), 0)
+    expect([1, 1], collect_rain([1, 1]), 1)
+    expect([0, 0], collect_rain([0, 0]), 0)
 
     # the rest:
     wall_expectations = [
@@ -133,4 +188,6 @@ if __name__ == '__main__':
         ([0, 12, 12, 0, 0], 12),
     ]
     for expectation in wall_expectations:
-        expect(expectation[0].copy(), collectRain(expectation[0]), expectation[1])
+        expect(expectation[0].copy(), collect_rain(expectation[0]), expectation[1])
+    for expectation in wall_expectations:
+        expect(expectation[0].copy(), collect_flood(expectation[0]), expectation[1])
